@@ -20,11 +20,11 @@ from streamlit.logger import get_logger
 LOGGER = get_logger(__name__)
 
 def affichage(row):
-    col1,col2 = st.columns([0.11,0.89])
+    col1,col2 = st.columns([0.12,0.88])
     with col1:
-        st.caption(row.Date)
+        st.write(row.Date)
     with col2:
-        st.markdown(f"<a style='color: #FF5733; text-decoration: none;' href={'https://'+row.Lien} target='_blank'>{row.Titre}</a>", unsafe_allow_html=True)   
+        st.markdown(f"<a style='color: #31333f ; text-decoration: none;' href={'https://'+row.Lien} target='_blank'>{'**'+row.Titre+'**'}</a>", unsafe_allow_html=True)   
         st.caption(row.Description)
 
 def run():
