@@ -27,6 +27,7 @@ def affichage(row):
         st.markdown(f"<a style='color: #31333f ; text-decoration: none;' href={'https://'+row.Lien} target='_blank'>{'**'+row.Titre+'**'}</a>", unsafe_allow_html=True)   
         st.caption(row.Description)
 
+
 def run():
     st.set_page_config(
         page_title="Base Presse AFA",
