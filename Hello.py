@@ -12,40 +12,48 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import datetime
+import pandas as pd
 import streamlit as st
 from streamlit.logger import get_logger
 
 LOGGER = get_logger(__name__)
 
+def affichage(row):
+    col1,col2 = st.columns([0.11,0.89])
+    with col1:
+        st.caption(row.Date)
+    with col2:
+        st.markdown(f"<a style='color: #FF5733; text-decoration: none;' href={'https://'+row.Lien} target='_blank'>{row.Titre}</a>", unsafe_allow_html=True)   
+        st.caption(row.Description)
 
 def run():
     st.set_page_config(
-        page_title="Hello",
-        page_icon="👋",
+        page_title="Base Presse AFA",
+        page_icon="",
     )
+    with open('copie_numerique.txt','r',encoding='utf-8-sig') as file:
+      lines = file.readlines()
+      for i in range(len(lines)):
+        lines[i] = lines[i].rstrip(' \n')
+    df = pd.DataFrame({'Titre':lines[0::4],'Date':lines[1::4],'Lien':lines[2::4],'Description':lines[3::4]})
 
-    st.write("# Welcome to Streamlit! 👋")
+    st.header('Base Presse AFA')
 
-    st.sidebar.success("Select a demo above.")
+    mots_clefs = st.text_input('Mots clefs :','').split()
 
-    st.markdown(
-        """
-        Streamlit is an open-source app framework built specifically for
-        Machine Learning and Data Science projects.
-        **👈 Select a demo from the sidebar** to see some examples
-        of what Streamlit can do!
-        ### Want to learn more?
-        - Check out [streamlit.io](https://streamlit.io)
-        - Jump into our [documentation](https://docs.streamlit.io)
-        - Ask a question in our [community
-          forums](https://discuss.streamlit.io)
-        ### See more complex demos
-        - Use a neural net to [analyze the Udacity Self-driving Car Image
-          Dataset](https://github.com/streamlit/demo-self-driving)
-        - Explore a [New York City rideshare dataset](https://github.com/streamlit/demo-uber-nyc-pickups)
-    """
-    )
+    col1,col2 = st.columns(2)
+    with col1:
+        date_1 = st.date_input('Du :',datetime.date(2023,1,1),format="DD/MM/YYYY")
+    with col2:
+        date_2 = st.date_input('Au :',datetime.datetime.now(),format="DD/MM/YYYY")
 
+    result = df[pd.to_datetime(df.Date, format=r'%d/%m/%Y').map(lambda x: x.date()).between(date_1,date_2)]
+    for mot in mots_clefs:
+        result = result[result.Titre.str.contains(mot,case=False)]
+    
+
+    result.apply(affichage,axis=1)
 
 if __name__ == "__main__":
     run()
