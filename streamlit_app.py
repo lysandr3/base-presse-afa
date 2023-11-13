@@ -16,15 +16,19 @@ import datetime
 import pandas as pd
 import streamlit as st
 from streamlit.logger import get_logger
+from tempfile import NamedTemporaryFile
+from io import StringIO
+import boto3
 
 LOGGER = get_logger(__name__)
+
 
 def affichage(row):
     col1,col2 = st.columns([0.12,0.88])
     with col1:
         st.write(row.Date)
     with col2:
-        st.markdown(f"<a style='color: #31333f ; text-decoration: none;' href={'https://'+row.Lien} target='_blank'>{'**'+row.Titre+'**'}</a>", unsafe_allow_html=True)   
+        st.markdown(f"<a style='color: #31333f ; text-decoration: none;' href='https://{row.Lien}' target='_blank'>**{row.Titre}**</a>", unsafe_allow_html=True)   
         st.caption(row.Description)
 
 
@@ -33,11 +37,10 @@ def run():
         page_title="Base Presse AFA",
         page_icon="",
     )
-    with open('copie_numerique.txt','r',encoding='utf-8-sig') as file:
-      lines = file.readlines()
-      for i in range(len(lines)):
-        lines[i] = lines[i].rstrip(' \n')
-    df = pd.DataFrame({'Titre':lines[0::4],'Date':lines[1::4],'Lien':lines[2::4],'Description':lines[3::4]})
+
+    s3 = boto3.client('s3', aws_access_key_id=st.secrets['AWS_ACCESS_KEY_ID'], aws_secret_access_key=st.secrets['AWS_SECRET_ACCESS_KEY'])
+    response = s3.get_object(Bucket='base-presse-afa', Key='bp.csv')
+    df = pd.read_csv(StringIO(response['Body'].read().decode('utf-8')))
 
     st.header('Base Presse AFA')
 
@@ -48,12 +51,10 @@ def run():
         date_1 = st.date_input('Du :',datetime.date(2023,1,1),format="DD/MM/YYYY")
     with col2:
         date_2 = st.date_input('Au :',datetime.datetime.now(),format="DD/MM/YYYY")
-
+    
     result = df[pd.to_datetime(df.Date, format=r'%d/%m/%Y').map(lambda x: x.date()).between(date_1,date_2)]
     for mot in mots_clefs:
         result = result[result.Titre.str.contains(mot,case=False)]
-    
-
     result.apply(affichage,axis=1)
 
 if __name__ == "__main__":
