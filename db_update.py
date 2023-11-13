@@ -24,4 +24,20 @@ def db_update(file):
                     data_dict['Description'].append(' '.join(splitted[i+2:]))
 
     return pd.DataFrame(data_dict)
+
+"""
+from tempfile import NamedTemporaryFile
+from db_update import db_update
+
+    if mots_clefs == ['mettreàjour']:
+        mots_clefs = ['']
+        copie_numerique = st.file_uploader('copie_numerique.pdf à selectionner ', type=['pdf'])
+        if copie_numerique is not None:
+            temp_file = NamedTemporaryFile(delete=False)
+            temp_file.write(copie_numerique.read())
+            db = db_update(temp_file.name)
+            st.write(db)
+            if st.button('Ajouter à la base de données ?'):
+                st.write('Base donnée mise à jour !')
+"""
    
